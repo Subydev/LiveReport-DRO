@@ -7,6 +7,9 @@ using System.Threading.Tasks;
 
 namespace LiveReport
 {
+    /// <summary>
+    /// Async Wrapper for TCPclient to allow proper async usage.
+    /// </summary>
     public class AsyncSocket
     {
         private TcpClient m_client;
@@ -28,9 +31,7 @@ namespace LiveReport
         /// </summary>
         public AsyncSocket()
         {
-#pragma warning disable IDE0017 // Simplify object initialization
             m_client = new TcpClient();
-#pragma warning restore IDE0017 // Simplify object initialization
             m_client.SendTimeout = timeout;
             m_client.ReceiveTimeout = timeout;
             connected = false;
@@ -101,7 +102,7 @@ namespace LiveReport
         /// <returns>recieved data as string</returns>
         public async Task<string> ReadLineAsync()
         {
-            byte[] data = new byte[2048];
+            byte[] data = new byte[29012];
             string message;
             CancellationTokenSource cts = new CancellationTokenSource(500);
             try
@@ -113,12 +114,12 @@ namespace LiveReport
                     message = string.Empty;
 
                 return message;
+
+                // I can use this after I get the latest version
+                //return await m_reader.ReadLineAsync();
             }
             catch (Exception ex)
             {
-                // I can use this after I get the latest version
-                //return await m_reader.ReadLineAsync();
-
                 Console.WriteLine($"ReadLineAsync: {ex.GetType()}: {ex.Message}");
                 connected = false;
                 if (ex.GetType() == typeof(IOException))
