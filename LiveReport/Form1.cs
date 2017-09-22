@@ -18,7 +18,7 @@ namespace LiveReport
         private AsyncSocket client = new AsyncSocket();
         private int objID;
         private int newObjID;
-        private bool isCurrent;
+        private bool planLoaded;
 
         private async void connectToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -80,11 +80,24 @@ namespace LiveReport
                 return;
 
             //Initial Entry
-            if (xmlresponse.Contains("inspect_plan_info"))
+            if (xmlresponse.Contains("<inspect_plan_info>"))
             {
                 BeginSearchLoop(xmlresponse);
                 return;
             }
+
+            if (xmlresponse.Contains("inspect_plan_info"))
+            {
+                planLoaded = false;
+                InfoTextStatus.Text = "Waiting for Report object....";
+                SendMeasure();
+            }
+            else
+            {
+                planLoaded = true;
+                InfoTextStatus.Text = "";
+            }
+              
 
             //Check if Last Feature has Measured Value and Get Results 
             if (xmlresponse.Contains("inspect_object_info"))
@@ -94,7 +107,7 @@ namespace LiveReport
                     if (newObjID != objID | newObjID == 0)
                     {
 
-                        //DROLayout.Controls.Clear();
+                        DROLayout.Controls.Clear();
                         //DROLayout.RowCount = 0;
 
                         //DROLayout.RowStyles.Clear();
@@ -544,7 +557,7 @@ namespace LiveReport
 
                 if (!hasControl)
                 {
-                   // DROLayout.RowStyles.RemoveAt(row);
+                    DROLayout.RowStyles.RemoveAt(row);
                     DROLayout.RowCount--;
                 }
             }
@@ -583,13 +596,6 @@ namespace LiveReport
                 }
             }
         }
-
-        //private async void loopTimer_Tick(object sender, EventArgs e)
-        //{
-        //    {
-        //        await client.SendAsync("<inspect_plan_info />");
-        //    }
-        //}
         private async void SendMeasure()
         {
             if (client.connected)
